@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createMemoryRateLimiter } from "@/lib/rate-limit";
+import { resetEnvCache } from "@/lib/env";
+import { NotConfiguredError } from "@/lib/errors";
+import { createMemoryRateLimiter, createRateLimiter } from "@/lib/rate-limit";
 
 describe("in-memory sliding window rate limiter", () => {
   beforeEach(() => {
@@ -52,5 +54,38 @@ describe("in-memory sliding window rate limiter", () => {
 
     const result = await limiter.limit("user-1");
     expect(result.reset).toBe(start + 30_000);
+  });
+});
+
+describe("createRateLimiter strictness (no Redis configured)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    resetEnvCache();
+  });
+
+  it("refuses to run on strict production deployments (Vercel)", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "1");
+    resetEnvCache();
+    expect(() => createRateLimiter({ name: "t", limit: 1, windowSeconds: 60 })).toThrow(
+      NotConfiguredError,
+    );
+  });
+
+  it("refuses to run when strict validation is explicitly enforced", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ENFORCE_ENV_VALIDATION", "true");
+    resetEnvCache();
+    expect(() => createRateLimiter({ name: "t", limit: 1, windowSeconds: 60 })).toThrow(
+      NotConfiguredError,
+    );
+  });
+
+  it("falls back to the in-memory window in non-strict production (CI, self-host)", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    resetEnvCache();
+    const limiter = createRateLimiter({ name: "t", limit: 1, windowSeconds: 60 });
+    expect((await limiter.limit("ci")).success).toBe(true);
+    expect((await limiter.limit("ci")).success).toBe(false);
   });
 });

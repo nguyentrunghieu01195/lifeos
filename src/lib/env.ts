@@ -219,15 +219,25 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
 }
 
 /**
+ * "Strict production" = a real deployment (Vercel) or an explicit opt-in.
+ * Used by boot validation and by services that refuse to degrade on real
+ * deployments but may fall back gracefully in CI / local production builds.
+ */
+export function isStrictProduction(source: NodeJS.ProcessEnv = process.env): boolean {
+  return (
+    source.NODE_ENV === "production" &&
+    (source.VERCEL === "1" || source.ENFORCE_ENV_VALIDATION === "true")
+  );
+}
+
+/**
  * Boot-time enforcement, called from src/instrumentation.ts.
  * Strict (throws) on Vercel production deployments or when
  * ENFORCE_ENV_VALIDATION=true; logs a readable report otherwise.
  */
 export function assertBootEnvironment(): void {
   const { errors, warnings } = validateEnvironment(process.env);
-  const strict =
-    process.env.NODE_ENV === "production" &&
-    (process.env.VERCEL === "1" || process.env.ENFORCE_ENV_VALIDATION === "true");
+  const strict = isStrictProduction();
 
   for (const warning of warnings) {
     console.warn(`[env] warning: ${warning}`);

@@ -21,7 +21,7 @@ let registerLimiter: RateLimiter | null = null;
 let loginLimiter: RateLimiter | null = null;
 
 function getRegisterLimiter(): RateLimiter {
-  registerLimiter ??= createRateLimiter({ name: "auth-register", limit: 5, windowSeconds: 600 });
+  registerLimiter ??= createRateLimiter({ name: "auth-register", limit: 10, windowSeconds: 600 });
   return registerLimiter;
 }
 

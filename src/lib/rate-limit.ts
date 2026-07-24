@@ -1,6 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 
-import { getEnv } from "@/lib/env";
+import { getEnv, isStrictProduction } from "@/lib/env";
 import { NotConfiguredError } from "@/lib/errors";
 import { getRedis, isRedisConfigured } from "@/lib/redis";
 
@@ -94,15 +94,17 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
   if (isRedisConfigured()) {
     return new UpstashRateLimiter(options);
   }
-  const env = getEnv();
-  if (env.NODE_ENV === "production") {
+  // Real deployments must not run with per-instance limits; CI and local
+  // production builds degrade to the in-memory window (same switch as boot
+  // validation — see ADR 0004).
+  if (isStrictProduction()) {
     throw new NotConfiguredError(
       "Rate limiting requires Upstash Redis in production. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
     );
   }
-  if (!warnedMemoryFallback && env.NODE_ENV !== "test") {
+  if (!warnedMemoryFallback && getEnv().NODE_ENV !== "test") {
     console.warn(
-      "[rate-limit] Upstash Redis not configured — using in-memory rate limiter (development only).",
+      "[rate-limit] Upstash Redis not configured — using an in-memory, per-instance rate limiter. Do not ship real traffic like this.",
     );
     warnedMemoryFallback = true;
   }
