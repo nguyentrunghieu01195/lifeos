@@ -66,6 +66,10 @@ Cloudflare R2 via the S3 API. File bytes never transit the serverless functions:
 - Secure-by-default session cookies and CSRF protection arrive with Auth.js in Phase 2; Server Actions additionally get Next's built-in origin checks.
 - Secrets only via environment variables — validated at boot ([ADR 0004](./docs/adr/0004-environment-validation.md)), never committed.
 
+## Authentication (Phase 2)
+
+Auth.js v5 with JWT sessions ([ADR 0005](./docs/adr/0005-authjs-jwt-credentials.md)). Google/GitHub OAuth register only when configured; email+password uses Argon2id hashes with enumeration-safe, rate-limited sign-in. `src/middleware.ts` (edge) guards `/dashboard/**` from the shared adapter-free config; the Node instance adds the Prisma adapter through a lazy function config. Sessions expose `user.id`; everything else is read fresh from Postgres.
+
 ## Environments
 
 | Concern   | Development                            | Production (Vercel)                   |

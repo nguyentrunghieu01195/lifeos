@@ -53,6 +53,10 @@ pnpm dev               # http://localhost:3000
 
 The app boots without Redis/R2/AI keys in development (features that need them raise a clear "not configured" message). Fill `.env` progressively as you enable features.
 
+### Authentication
+
+Set `AUTH_SECRET` (generate: `openssl rand -base64 32`). Google/GitHub sign-in buttons appear automatically once the matching `*_CLIENT_ID`/`*_CLIENT_SECRET` pairs are set — callback URLs are documented in [.env.example](./.env.example). Email/password works with no extra configuration.
+
 ### Choosing the AI provider
 
 ```bash
@@ -63,20 +67,21 @@ Set the matching key (`GEMINI_API_KEY` / `GROQ_API_KEY` / `AIAND_API_KEY` + `AIA
 
 ## Scripts
 
-| Script            | Purpose                                   |
-| ----------------- | ----------------------------------------- |
-| `pnpm dev`        | Dev server (Turbopack)                    |
-| `pnpm build`      | Production build (runs `prisma generate`) |
-| `pnpm start`      | Serve the production build                |
-| `pnpm lint`       | ESLint                                    |
-| `pnpm typecheck`  | TypeScript, no emit                       |
-| `pnpm test`       | Unit/component tests (Vitest)             |
-| `pnpm e2e`        | End-to-end tests (Playwright)             |
-| `pnpm check`      | lint + typecheck + test                   |
-| `pnpm db:migrate` | Create/apply dev migrations               |
-| `pnpm db:deploy`  | Apply migrations in production            |
-| `pnpm db:studio`  | Prisma Studio                             |
-| `pnpm db:local`   | Boot the embedded local Postgres          |
+| Script                  | Purpose                                      |
+| ----------------------- | -------------------------------------------- |
+| `pnpm dev`              | Dev server (Turbopack)                       |
+| `pnpm build`            | Production build (runs `prisma generate`)    |
+| `pnpm start`            | Serve the production build                   |
+| `pnpm lint`             | ESLint                                       |
+| `pnpm typecheck`        | TypeScript, no emit                          |
+| `pnpm test`             | Unit/component tests (Vitest)                |
+| `pnpm e2e`              | End-to-end tests (Playwright)                |
+| `pnpm test:integration` | Unit + DB integration tests (needs Postgres) |
+| `pnpm check`            | lint + typecheck + test                      |
+| `pnpm db:migrate`       | Create/apply dev migrations                  |
+| `pnpm db:deploy`        | Apply migrations in production               |
+| `pnpm db:studio`        | Prisma Studio                                |
+| `pnpm db:local`         | Boot the embedded local Postgres             |
 
 ## Deployment (Vercel)
 
@@ -113,7 +118,7 @@ docs/adr/        Architecture decision records
 Delivered phase by phase; every phase compiles, passes tests, and ships migrations.
 
 - [x] **Phase 1 — Architecture**: app scaffold, design system, env validation, data layer, Redis, R2, AI Gateway
-- [ ] Phase 2 — Authentication (Auth.js: Google, GitHub, email)
+- [x] **Phase 2 — Authentication**: Auth.js v5 — Google + GitHub OAuth, email/password (Argon2id), protected routes
 - [ ] Phase 3 — App shell & Dashboard
 - [ ] Phase 4 — Tasks · Phase 5 — Calendar · Phase 6 — Notes · Phase 7 — Documents
 - [ ] Phase 8 — Finance · Phase 9 — Habits · Phase 10 — Health · Phase 11 — Shopping
