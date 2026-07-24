@@ -64,12 +64,14 @@ test.describe("authentication", () => {
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill("wrong password entirely");
     await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page.getByRole("alert")).toHaveText("Invalid email or password.");
+    // Note: Next.js injects an empty route-announcer with role="alert", so the
+    // assertion targets the visible message text itself.
+    await expect(page.getByText("Invalid email or password.", { exact: true })).toBeVisible();
 
     // Unknown email — identical message (no user enumeration)
     await page.getByLabel("Email").fill(uniqueEmail());
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page.getByRole("alert")).toHaveText("Invalid email or password.");
+    await expect(page.getByText("Invalid email or password.", { exact: true })).toBeVisible();
   });
 });
