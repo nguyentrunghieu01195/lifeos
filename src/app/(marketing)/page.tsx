@@ -1,10 +1,12 @@
 import { FeatureGrid } from "@/components/marketing/feature-grid";
+import { SiteHeader } from "@/components/marketing/site-header";
 import { Hero } from "@/components/marketing/hero";
 
 export default function MarketingPage() {
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-clip">
       <BackgroundGlow />
+      <SiteHeader />
       <main className="flex-1">
         <Hero />
         <FeatureGrid />

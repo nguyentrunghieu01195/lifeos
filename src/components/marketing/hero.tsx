@@ -1,7 +1,8 @@
 "use client";
 
+import { ArrowRight, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowDown, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -45,13 +46,13 @@ export function Hero() {
         className="mt-10 flex flex-wrap items-center justify-center gap-3"
       >
         <Button size="lg" asChild>
-          <a href="#modules">
-            Explore the modules
-            <ArrowDown aria-hidden />
-          </a>
+          <Link href="/register">
+            Get started free
+            <ArrowRight aria-hidden />
+          </Link>
         </Button>
         <Button size="lg" variant="outline" asChild>
-          <a href="#assistant">Meet the assistant</a>
+          <Link href="/login">Sign in</Link>
         </Button>
       </motion.div>
     </section>
