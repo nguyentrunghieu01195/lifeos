@@ -1,0 +1,30 @@
+// LifeOS Prisma schema.
+//
+// The client is generated into src/generated/prisma (gitignored) and accessed
+// exclusively through src/lib/db.ts, which wires the Neon serverless driver in
+// production and node-postgres in development (driver adapters).
+//
+// Schema evolution is strictly additive per phase; every phase lands its own
+// migration. Phase 2 (authentication) extends User and adds the Auth.js models.
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
