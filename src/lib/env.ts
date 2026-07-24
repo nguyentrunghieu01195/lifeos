@@ -35,6 +35,13 @@ const envSchema = z.object({
   DATABASE_URL: optionalUrl,
   DATABASE_DRIVER: z.enum(["neon", "pg"]).optional(),
 
+  AUTH_SECRET: optionalString,
+  AUTH_URL: optionalUrl,
+  GOOGLE_CLIENT_ID: optionalString,
+  GOOGLE_CLIENT_SECRET: optionalString,
+  GITHUB_CLIENT_ID: optionalString,
+  GITHUB_CLIENT_SECRET: optionalString,
+
   AI_PROVIDER: z.enum(AI_PROVIDER_IDS).default("gemini"),
   AI_MODEL: optionalString,
   GEMINI_API_KEY: optionalString,
@@ -138,6 +145,23 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
 
   if (!env.DATABASE_URL) {
     errors.push("DATABASE_URL is not set — the app cannot reach PostgreSQL.");
+  }
+
+  requireOrWarn(
+    !env.AUTH_SECRET,
+    "AUTH_SECRET is not set — sessions cannot be signed. Generate one with `openssl rand -base64 32`.",
+  );
+  const oauthPairs: Array<[string, string | undefined, string, string | undefined]> = [
+    ["GOOGLE_CLIENT_ID", env.GOOGLE_CLIENT_ID, "GOOGLE_CLIENT_SECRET", env.GOOGLE_CLIENT_SECRET],
+    ["GITHUB_CLIENT_ID", env.GITHUB_CLIENT_ID, "GITHUB_CLIENT_SECRET", env.GITHUB_CLIENT_SECRET],
+  ];
+  for (const [idName, id, secretName, secret] of oauthPairs) {
+    if (Boolean(id) !== Boolean(secret)) {
+      errors.push(`OAuth provider partially configured — set both ${idName} and ${secretName}.`);
+    }
+  }
+  if (!env.GOOGLE_CLIENT_ID && !env.GITHUB_CLIENT_ID) {
+    warnings.push("No OAuth providers configured — only email/password sign-in will be offered.");
   }
 
   const requiredAIKey = AI_KEY_BY_PROVIDER[env.AI_PROVIDER];

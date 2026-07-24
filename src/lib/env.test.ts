@@ -6,6 +6,9 @@ import { validateEnvironment } from "@/lib/env";
 const fullProduction: NodeJS.ProcessEnv = {
   NODE_ENV: "production",
   DATABASE_URL: "postgresql://user:pass@ep-example.eu-central-1.aws.neon.tech/lifeos",
+  AUTH_SECRET: "a-test-signing-secret",
+  GOOGLE_CLIENT_ID: "google-client-id",
+  GOOGLE_CLIENT_SECRET: "google-client-secret",
   AI_PROVIDER: "gemini",
   GEMINI_API_KEY: "test-key",
   UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
@@ -95,6 +98,38 @@ describe("validateEnvironment", () => {
     });
     expect(report.errors).toEqual([]);
     expect(report.warnings.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("errors in production when AUTH_SECRET is missing, warns in development", () => {
+    const prod = validateEnvironment({ ...fullProduction, AUTH_SECRET: undefined });
+    expect(prod.errors.join("\n")).toContain("AUTH_SECRET");
+
+    const dev = validateEnvironment({
+      ...fullProduction,
+      NODE_ENV: "development",
+      AUTH_SECRET: undefined,
+    });
+    expect(dev.errors).toEqual([]);
+    expect(dev.warnings.join("\n")).toContain("AUTH_SECRET");
+  });
+
+  it("flags partially configured OAuth providers as an error in every environment", () => {
+    const report = validateEnvironment({
+      ...fullProduction,
+      NODE_ENV: "development",
+      GOOGLE_CLIENT_SECRET: undefined,
+    });
+    expect(report.errors.join("\n")).toContain("GOOGLE_CLIENT_SECRET");
+  });
+
+  it("only warns when no OAuth provider is configured at all", () => {
+    const report = validateEnvironment({
+      ...fullProduction,
+      GOOGLE_CLIENT_ID: undefined,
+      GOOGLE_CLIENT_SECRET: undefined,
+    });
+    expect(report.errors).toEqual([]);
+    expect(report.warnings.join("\n")).toContain("OAuth");
   });
 
   it("reports malformed values as errors", () => {
