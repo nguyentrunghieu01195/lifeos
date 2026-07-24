@@ -8,7 +8,8 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
   workers: isCI ? 1 : undefined,
-  reporter: isCI ? "github" : "html",
+  // In CI: inline annotations + an HTML report uploaded as an artifact on failure.
+  reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["html", { open: "never" }]],
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
