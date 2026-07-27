@@ -44,3 +44,6 @@ pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo
+
+# Local storage driver (dev/CI file uploads)
+.storage/
