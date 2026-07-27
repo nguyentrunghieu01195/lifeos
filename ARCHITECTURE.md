@@ -72,9 +72,9 @@ Auth.js v5 with JWT sessions ([ADR 0005](./docs/adr/0005-authjs-jwt-credentials.
 
 ## Environments
 
-| Concern   | Development                            | Production (Vercel)                     |
-| --------- | -------------------------------------- | --------------------------------------- |
-| Postgres  | Local/embedded (`pnpm db:local`)       | Neon via serverless driver              |
-| Redis     | Optional (in-memory limiter)           | Warned until a shipped feature needs it |
-| R2        | Optional (typed not-configured errors) | Warned until Documents ship             |
-| Env check | Warnings at boot                       | Strict — deploy fails on missing vars   |
+| Concern   | Development                            | Production (Vercel)                       |
+| --------- | -------------------------------------- | ----------------------------------------- |
+| Postgres  | Local/embedded (`pnpm db:local`)       | Neon via serverless driver                |
+| Redis     | Optional (in-memory limiter)           | Required — auth rate limiting consumes it |
+| R2        | Optional (typed not-configured errors) | Warned until Documents ship               |
+| Env check | Warnings at boot                       | Strict — deploy fails on missing vars     |

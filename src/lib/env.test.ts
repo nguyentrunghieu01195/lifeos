@@ -59,6 +59,16 @@ describe("validateEnvironment", () => {
     expect(report.warnings.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("requires Upstash at boot on strict production deployments (auth rate limiting)", () => {
+    const report = validateEnvironment({
+      NODE_ENV: "production",
+      VERCEL: "1",
+      DATABASE_URL: "postgresql://user:pass@ep-example.eu-central-1.aws.neon.tech/lifeos",
+      AUTH_SECRET: "a-test-signing-secret",
+    });
+    expect(report.errors.join("\n")).toContain("UPSTASH_REDIS_REST_URL");
+  });
+
   it("treats a fully unconfigured aiand selection as a warning, not an error", () => {
     const report = validateEnvironment({
       ...fullProduction,

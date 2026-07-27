@@ -196,9 +196,17 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
       "Upstash Redis is partially configured — set both UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
     );
   } else if (!upstashConfigured.every(Boolean)) {
-    warnings.push(
-      "Upstash Redis is not configured — rate limiting falls back to a per-instance window and caching is disabled.",
-    );
+    if (isStrictProduction(source)) {
+      // Auth rate limiting is a shipped consumer: per-instance windows are
+      // ineffective on serverless, so real deployments must fail at boot.
+      errors.push(
+        "Upstash Redis is required on production deployments — auth rate limiting must be durable. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
+      );
+    } else {
+      warnings.push(
+        "Upstash Redis is not configured — rate limiting falls back to a per-instance window and caching is disabled.",
+      );
+    }
   }
 
   const r2Vars: Array<[string, string | undefined]> = [
