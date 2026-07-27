@@ -41,6 +41,9 @@ model User {
   notes    Note[]
   noteFolders NoteFolder[]
   documents Document[]
+  financeCategories FinanceCategory[]
+  transactions Transaction[]
+  budgets Budget[]
 
   @@map("users")
 }
@@ -294,4 +297,76 @@ model Document {
   @@index([userId, createdAt])
   @@index([userId, status])
   @@map("documents")
+}
+
+// ----------------------------------------------------------------------------
+// Finance (Phase 8)
+// ----------------------------------------------------------------------------
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model FinanceCategory {
+  id     String          @id @default(cuid())
+  userId String
+  name   String
+  /// Emoji shown next to the name.
+  icon   String          @default("💸")
+  color  String          @default("#6366f1")
+  /// A category belongs to one side of the ledger.
+  type   TransactionType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@unique([userId, type, name])
+  @@map("finance_categories")
+}
+
+model Transaction {
+  id     String          @id @default(cuid())
+  userId String
+  type   TransactionType
+  /// Amount in minor units (VND đồng) — integer math only, never floats.
+  amountMinor BigInt
+  note        String   @default("")
+  /// Date-only semantics: always midnight UTC of the picked calendar day.
+  occurredAt  DateTime
+  categoryId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category FinanceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId, occurredAt])
+  @@index([userId, categoryId])
+  @@map("transactions")
+}
+
+model Budget {
+  id     String  @id @default(cuid())
+  userId String
+  /// Null = the overall monthly budget (single row enforced in the service).
+  categoryId String?
+  /// Month bucket as "YYYY-MM" — timezone-proof by construction.
+  month       String
+  amountMinor BigInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category FinanceCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month, categoryId])
+  @@index([userId, month])
+  @@map("budgets")
 }
