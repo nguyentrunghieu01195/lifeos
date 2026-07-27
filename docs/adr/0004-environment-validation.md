@@ -23,6 +23,6 @@ Three cooperating mechanisms in `src/lib/env.ts`:
 
 ## Consequences
 
-- One file owns the environment contract; `.env.example` documents it for humans and the validation report names variables verbatim.
+- One file owns the environment contract; `.env.example` documents it for humans and the validation report names variables verbatim.\n- A service becomes production-required only in the phase that ships a feature consuming it (AI keys with AI features, R2 with Documents, Redis with caching-critical views); until then its absence is a warning. Partial configuration is always an error — it is a mistake, not a choice.
 - Rate limiting follows the same switch: strict production without Redis refuses to start a limiter; development, CI and non-strict production builds fall back to a per-instance in-memory window with a logged warning.
 - Tests cover the rules as pure functions (`validateEnvironment(source)`).

@@ -37,19 +37,36 @@ describe("validateEnvironment", () => {
     }
   });
 
-  it("errors in production when the selected provider's key is missing", () => {
-    const report = validateEnvironment({ ...fullProduction, GEMINI_API_KEY: undefined });
-    expect(report.errors.join("\n")).toContain("GEMINI_API_KEY");
+  it("warns (never errors) when the selected provider's key is missing — AI ships later", () => {
+    for (const nodeEnv of ["development", "production"] as const) {
+      const report = validateEnvironment({
+        ...fullProduction,
+        NODE_ENV: nodeEnv,
+        GEMINI_API_KEY: undefined,
+      });
+      expect(report.errors).toEqual([]);
+      expect(report.warnings.join("\n")).toContain("GEMINI_API_KEY");
+    }
   });
 
-  it("only warns in development when the selected provider's key is missing", () => {
+  it("boots a minimal production deployment (database + auth secret only) with warnings", () => {
+    const report = validateEnvironment({
+      NODE_ENV: "production",
+      DATABASE_URL: "postgresql://user:pass@ep-example.eu-central-1.aws.neon.tech/lifeos",
+      AUTH_SECRET: "a-test-signing-secret",
+    });
+    expect(report.errors).toEqual([]);
+    expect(report.warnings.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("treats a fully unconfigured aiand selection as a warning, not an error", () => {
     const report = validateEnvironment({
       ...fullProduction,
-      NODE_ENV: "development",
+      AI_PROVIDER: "aiand",
       GEMINI_API_KEY: undefined,
     });
     expect(report.errors).toEqual([]);
-    expect(report.warnings.join("\n")).toContain("GEMINI_API_KEY");
+    expect(report.warnings.join("\n")).toContain("aiand");
   });
 
   it("treats empty strings from .env files as missing", () => {

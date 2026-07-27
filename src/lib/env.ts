@@ -164,27 +164,30 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
     warnings.push("No OAuth providers configured — only email/password sign-in will be offered.");
   }
 
-  const requiredAIKey = AI_KEY_BY_PROVIDER[env.AI_PROVIDER];
-  const hasAIKey = Boolean(
-    env.AI_PROVIDER === "gemini"
-      ? env.GEMINI_API_KEY
-      : env.AI_PROVIDER === "groq"
-        ? env.GROQ_API_KEY
-        : env.AIAND_API_KEY,
-  );
-  requireOrWarn(
-    !hasAIKey,
-    `AI_PROVIDER is "${env.AI_PROVIDER}" but ${requiredAIKey} is not set — AI features will fail.`,
-  );
+  // Optional services below are WARNINGS while absent — they become required
+  // in the phase that ships their consuming feature (AI chat, caching-critical
+  // views, document storage). Partial configuration is always an error: it is
+  // a mistake, not a choice.
   if (env.AI_PROVIDER === "aiand") {
-    requireOrWarn(
-      !env.AIAND_BASE_URL,
-      'AI_PROVIDER is "aiand" but AIAND_BASE_URL is not set — the AIAND provider needs an OpenAI-compatible base URL.',
-    );
-    requireOrWarn(
-      !env.AI_MODEL,
-      'AI_PROVIDER is "aiand" but AI_MODEL is not set — AIAND has no default model.',
-    );
+    const aiandParts: Array<[string, string | undefined]> = [
+      ["AIAND_API_KEY", env.AIAND_API_KEY],
+      ["AIAND_BASE_URL", env.AIAND_BASE_URL],
+      ["AI_MODEL", env.AI_MODEL],
+    ];
+    const missing = aiandParts.filter(([, value]) => !value).map(([name]) => name);
+    if (missing.length === aiandParts.length) {
+      warnings.push('AI_PROVIDER is "aiand" but it is not configured — AI features will fail.');
+    } else if (missing.length > 0) {
+      errors.push(`AIAND is partially configured — missing ${missing.join(", ")}.`);
+    }
+  } else {
+    const requiredAIKey = AI_KEY_BY_PROVIDER[env.AI_PROVIDER];
+    const hasAIKey = Boolean(env.AI_PROVIDER === "gemini" ? env.GEMINI_API_KEY : env.GROQ_API_KEY);
+    if (!hasAIKey) {
+      warnings.push(
+        `AI_PROVIDER is "${env.AI_PROVIDER}" but ${requiredAIKey} is not set — AI features will fail.`,
+      );
+    }
   }
 
   const upstashConfigured = [env.UPSTASH_REDIS_REST_URL, env.UPSTASH_REDIS_REST_TOKEN];
@@ -192,10 +195,9 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
     errors.push(
       "Upstash Redis is partially configured — set both UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
     );
-  } else {
-    requireOrWarn(
-      !upstashConfigured.every(Boolean),
-      "Upstash Redis is not configured — caching and durable rate limiting are unavailable.",
+  } else if (!upstashConfigured.every(Boolean)) {
+    warnings.push(
+      "Upstash Redis is not configured — rate limiting falls back to a per-instance window and caching is disabled.",
     );
   }
 
@@ -208,9 +210,8 @@ export function validateEnvironment(source: NodeJS.ProcessEnv = process.env): En
   const r2Missing = r2Vars.filter(([, value]) => !value).map(([name]) => name);
   if (r2Missing.length > 0 && r2Missing.length < r2Vars.length) {
     errors.push(`Cloudflare R2 is partially configured — missing ${r2Missing.join(", ")}.`);
-  } else {
-    requireOrWarn(
-      r2Missing.length === r2Vars.length,
+  } else if (r2Missing.length === r2Vars.length) {
+    warnings.push(
       "Cloudflare R2 is not configured — file storage (documents, images, avatars) is unavailable.",
     );
   }

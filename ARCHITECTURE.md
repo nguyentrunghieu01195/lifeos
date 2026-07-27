@@ -54,7 +54,7 @@ A feature module owns everything about its domain. Cross-feature access happens 
 ## Caching & rate limiting
 
 - Upstash Redis over REST (serverless-safe). `cached()` provides read-through JSON caching under namespaced keys (`lifeos:<area>:<id>`); mutations invalidate explicitly.
-- `createRateLimiter()` gives named sliding-window limiters (auth, api, ai). Development falls back to an in-memory window; production requires Redis and fails fast otherwise.
+- `createRateLimiter()` gives named sliding-window limiters (auth, api, ai). Without Redis it falls back to a per-instance in-memory window everywhere except strict production deployments, which fail fast.
 
 ## Storage
 
@@ -72,9 +72,9 @@ Auth.js v5 with JWT sessions ([ADR 0005](./docs/adr/0005-authjs-jwt-credentials.
 
 ## Environments
 
-| Concern   | Development                            | Production (Vercel)                   |
-| --------- | -------------------------------------- | ------------------------------------- |
-| Postgres  | Local/embedded (`pnpm db:local`)       | Neon via serverless driver            |
-| Redis     | Optional (in-memory limiter)           | Upstash required                      |
-| R2        | Optional (typed not-configured errors) | Required                              |
-| Env check | Warnings at boot                       | Strict — deploy fails on missing vars |
+| Concern   | Development                            | Production (Vercel)                     |
+| --------- | -------------------------------------- | --------------------------------------- |
+| Postgres  | Local/embedded (`pnpm db:local`)       | Neon via serverless driver              |
+| Redis     | Optional (in-memory limiter)           | Warned until a shipped feature needs it |
+| R2        | Optional (typed not-configured errors) | Warned until Documents ship             |
+| Env check | Warnings at boot                       | Strict — deploy fails on missing vars   |
