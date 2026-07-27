@@ -22,7 +22,7 @@ test.describe("app shell", () => {
     await registerFreshUser(page);
 
     const sidebar = page.getByRole("navigation").first();
-    await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();
     // Unshipped modules are visible but disabled.
     const tasksButton = page.getByRole("button", { name: /Tasks/ });
     await expect(tasksButton).toBeVisible();

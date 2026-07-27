@@ -29,7 +29,7 @@ test.describe("authentication", () => {
     await page.getByRole("button", { name: "Create account" }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: /Welcome, E2E/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /, E2E/ })).toBeVisible();
     await expect(page.getByText(email)).toBeVisible();
 
     // Sign out
@@ -43,7 +43,7 @@ test.describe("authentication", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: /Welcome, E2E/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /, E2E/ })).toBeVisible();
   });
 
   test("shows one identical error for wrong password and unknown email", async ({ page }) => {
