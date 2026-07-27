@@ -1,26 +1,46 @@
-import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { Logo } from "@/components/brand/logo";
-import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { AppHeader } from "@/components/app-shell/app-header";
+import { AppSidebar } from "@/components/app-shell/app-sidebar";
+import { CommandPalette } from "@/components/app-shell/command-palette";
+import { UserMenu } from "@/components/app-shell/user-menu";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { auth } from "@/lib/auth";
+import { getDb } from "@/lib/db";
 
 /**
- * Minimal authenticated shell — header with brand and sign-out.
- * Phase 3 replaces this with the full app shell (sidebar, command palette,
- * theme toggle, notifications).
+ * Authenticated application shell: inset sidebar (state persisted in a
+ * cookie), top bar with command palette and user menu, and the global ⌘K
+ * palette. Middleware guards these routes; the session check here is defense
+ * in depth and feeds the user menu.
  */
-export default function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function AppLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const user = await getDb().user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, email: true, image: true },
+  });
+  if (!user) {
+    redirect("/login");
+  }
+
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
   return (
-    <div className="min-h-dvh">
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-          <Link href="/dashboard" aria-label="Dashboard">
-            <Logo />
-          </Link>
-          <SignOutButton />
-        </div>
-      </header>
-      <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
-    </div>
+    <SidebarProvider defaultOpen={defaultOpen}>
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader userMenu={<UserMenu name={user.name} email={user.email} image={user.image} />} />
+        <main className="flex-1 px-4 py-6 md:px-8">{children}</main>
+      </SidebarInset>
+      <CommandPalette />
+    </SidebarProvider>
   );
 }
