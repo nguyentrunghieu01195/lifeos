@@ -89,7 +89,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Finance",
         href: "/finance",
         icon: Wallet,
-        status: "soon",
+        status: "available",
         description: "Income, expenses and budgets",
       },
       {

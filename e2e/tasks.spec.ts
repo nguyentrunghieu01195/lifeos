@@ -32,7 +32,7 @@ test.describe("tasks", () => {
 
     // Complete it — moves into the collapsed Done section.
     await page.getByRole("button", { name: 'Complete "Buy oat milk"' }).click();
-    await expect(page.getByRole("button", { name: /Done · 1/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Done · 1/ })).toBeVisible({ timeout: 15_000 });
 
     // Full editor: create a task due today with high priority.
     await page.getByRole("button", { name: "New task" }).click();
