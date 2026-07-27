@@ -56,7 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Tasks",
         href: "/tasks",
         icon: CheckCircle2,
-        status: "soon",
+        status: "available",
         description: "Projects, priorities and boards",
       },
       {

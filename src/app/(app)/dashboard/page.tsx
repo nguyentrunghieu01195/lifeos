@@ -5,6 +5,8 @@ import { AccountCard } from "@/features/dashboard/components/account-card";
 import { Greeting } from "@/features/dashboard/components/greeting";
 import { ModulesOverviewCard } from "@/features/dashboard/components/modules-overview";
 import { QuickActionsCard } from "@/features/dashboard/components/quick-actions";
+import { TodayTasksCard } from "@/features/dashboard/components/today-tasks";
+import { getTodayTaskSummary } from "@/features/tasks/server/service";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
@@ -21,10 +23,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const user = await getDb().user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, email: true, image: true, createdAt: true },
-  });
+  const [user, taskSummary] = await Promise.all([
+    getDb().user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true, email: true, image: true, createdAt: true },
+    }),
+    getTodayTaskSummary(session.user.id),
+  ]);
   if (!user) {
     redirect("/login");
   }
@@ -36,6 +41,7 @@ export default async function DashboardPage() {
       <Greeting firstName={firstName} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <TodayTasksCard summary={taskSummary} />
         <AccountCard
           name={user.name}
           email={user.email}

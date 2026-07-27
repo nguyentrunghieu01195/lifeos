@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, LogOut, Monitor, Moon, Sun } from "lucide-react";
+import { Home, LogOut, Monitor, Moon, Plus, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
@@ -66,6 +66,14 @@ export function CommandPalette() {
           <CommandItem onSelect={() => run(() => router.push("/"))}>
             <Home aria-hidden />
             Landing page
+          </CommandItem>
+        </CommandGroup>
+
+        <CommandSeparator />
+        <CommandGroup heading="Actions">
+          <CommandItem onSelect={() => run(() => router.push("/tasks?new=1"))}>
+            <Plus aria-hidden />
+            New task
           </CommandItem>
         </CommandGroup>
 

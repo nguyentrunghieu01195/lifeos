@@ -19,8 +19,8 @@ describe("nav-config", () => {
     expect(ALL_NAV_ITEMS).toHaveLength(13);
   });
 
-  it("only the dashboard is live in Phase 3", () => {
-    expect(AVAILABLE_NAV_ITEMS.map((item) => item.href)).toEqual(["/dashboard"]);
+  it("dashboard and tasks are live as of Phase 4", () => {
+    expect(AVAILABLE_NAV_ITEMS.map((item) => item.href)).toEqual(["/dashboard", "/tasks"]);
   });
 
   it("resolves section titles from pathnames, including nested routes", () => {
