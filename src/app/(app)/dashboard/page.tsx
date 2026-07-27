@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AccountCard } from "@/features/dashboard/components/account-card";
 import { FinanceSummaryCard } from "@/features/dashboard/components/finance-summary";
 import { TodayHabitsCard } from "@/features/dashboard/components/today-habits";
+import { HealthSummaryCard } from "@/features/dashboard/components/health-summary";
 import { Greeting } from "@/features/dashboard/components/greeting";
 import { ModulesOverviewCard } from "@/features/dashboard/components/modules-overview";
 import { QuickActionsCard } from "@/features/dashboard/components/quick-actions";
@@ -13,6 +14,7 @@ import { UpcomingEventsCard } from "@/features/dashboard/components/upcoming-eve
 import { getUpcomingEvents } from "@/features/calendar/server/service";
 import { getDashboardFinance } from "@/features/finance/server/service";
 import { getTodayHabits } from "@/features/habits/server/service";
+import { getTodayHealth } from "@/features/health/server/service";
 import { getRecentNotes } from "@/features/notes/server/service";
 import { getTodayTaskSummary } from "@/features/tasks/server/service";
 import { auth } from "@/lib/auth";
@@ -31,17 +33,19 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [user, taskSummary, upcomingEvents, recentNotes, finance, todayHabits] = await Promise.all([
-    getDb().user.findUnique({
-      where: { id: session.user.id },
-      select: { name: true, email: true, image: true, createdAt: true },
-    }),
-    getTodayTaskSummary(session.user.id),
-    getUpcomingEvents(session.user.id),
-    getRecentNotes(session.user.id),
-    getDashboardFinance(session.user.id),
-    getTodayHabits(session.user.id),
-  ]);
+  const [user, taskSummary, upcomingEvents, recentNotes, finance, todayHabits, todayHealth] =
+    await Promise.all([
+      getDb().user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, email: true, image: true, createdAt: true },
+      }),
+      getTodayTaskSummary(session.user.id),
+      getUpcomingEvents(session.user.id),
+      getRecentNotes(session.user.id),
+      getDashboardFinance(session.user.id),
+      getTodayHabits(session.user.id),
+      getTodayHealth(session.user.id),
+    ]);
   if (!user) {
     redirect("/login");
   }
@@ -66,6 +70,7 @@ export default async function DashboardPage() {
           done={todayHabits.done}
           habits={todayHabits.habits}
         />
+        <HealthSummaryCard data={todayHealth} />
         <AccountCard
           name={user.name}
           email={user.email}

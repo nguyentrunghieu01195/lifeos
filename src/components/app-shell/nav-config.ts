@@ -103,7 +103,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Health",
         href: "/health",
         icon: HeartPulse,
-        status: "soon",
+        status: "available",
         description: "Weight, sleep, water and workouts",
       },
       {
