@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures";
 
 /** Tasks module journey: quick add, complete, edit, views, AI degradation. */
 
