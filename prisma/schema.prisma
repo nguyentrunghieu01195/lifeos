@@ -34,6 +34,9 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  tasks    Task[]
+  projects Project[]
+  tagsOwned Tag[]
 
   @@map("users")
 }
@@ -82,4 +85,98 @@ model VerificationToken {
 
   @@id([identifier, token])
   @@map("verification_tokens")
+}
+
+// ----------------------------------------------------------------------------
+// Tasks (Phase 4)
+// ----------------------------------------------------------------------------
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum RecurrenceFreq {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum TaskSource {
+  MANUAL
+  AI
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String   @default("#6366f1")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@map("projects")
+}
+
+model Tag {
+  id     String @id @default(cuid())
+  userId String
+  name   String
+  color  String @default("#0ea5e9")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[] @relation("TaskTags")
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  userId      String
+  projectId   String?
+  parentId    String?
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  source      TaskSource   @default(MANUAL)
+  /// Fractional ordering inside a board column / list.
+  position    Float        @default(0)
+  dueAt       DateTime?
+  reminderAt  DateTime?
+  completedAt DateTime?
+
+  /// Todoist-style recurrence: completing the task rolls dueAt forward by
+  /// interval x freq instead of marking it done.
+  recurrenceFreq     RecurrenceFreq?
+  recurrenceInterval Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  parent   Task?    @relation("Subtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[]   @relation("Subtasks")
+  tags     Tag[]    @relation("TaskTags")
+
+  @@index([userId, status])
+  @@index([userId, dueAt])
+  @@index([projectId])
+  @@index([parentId])
+  @@map("tasks")
 }
