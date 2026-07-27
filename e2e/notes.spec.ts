@@ -98,7 +98,10 @@ test.describe("notes", () => {
     // No AI provider is configured in CI — the failure must be a friendly message.
     await page.getByRole("button", { name: "AI", exact: true }).click();
     await page.getByRole("menuitem", { name: "Summarize note" }).click();
-    await expect(page.getByText(/GEMINI_API_KEY|provider/i)).toBeVisible({ timeout: 15_000 });
+    const toast = page.getByText(/GEMINI_API_KEY|provider/i);
+    await expect(toast).toBeVisible({ timeout: 15_000 });
+    // The toast overlays the header buttons — wait for it to auto-dismiss.
+    await expect(toast).not.toBeVisible({ timeout: 10_000 });
 
     // Two-step delete returns to the list.
     await page.getByRole("button", { name: "Delete note", exact: true }).click();

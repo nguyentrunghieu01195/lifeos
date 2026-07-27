@@ -77,7 +77,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Documents",
         href: "/documents",
         icon: FileText,
-        status: "soon",
+        status: "available",
         description: "Files, PDFs and uploads",
       },
     ],

@@ -65,6 +65,25 @@ AI_PROVIDER=gemini     # gemini | groq | aiand
 
 Set the matching key (`GEMINI_API_KEY` / `GROQ_API_KEY` / `AIAND_API_KEY` + `AIAND_BASE_URL` + `AI_MODEL`). Switching providers is configuration only — no code changes.
 
+### File storage (Documents)
+
+Files live in **Cloudflare R2** (see [ADR 0006](./docs/adr/0006-file-storage.md)). Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `R2_BUCKET_NAME`. Without them, development/CI falls back to a local `.storage/` directory automatically; production deployments show a friendly "storage not configured" error on upload instead.
+
+Browsers upload straight to R2 via presigned URLs, so the bucket needs a **CORS policy** (R2 dashboard → bucket → Settings → CORS):
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://your-app.vercel.app", "http://localhost:3000"],
+    "AllowedMethods": ["PUT"],
+    "AllowedHeaders": ["content-type"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Downloads/previews never need CORS — they flow through the authenticated `/api/files/[id]` endpoint.
+
 ## Scripts
 
 | Script                  | Purpose                                      |
