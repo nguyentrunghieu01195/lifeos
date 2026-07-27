@@ -18,10 +18,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // Keep node-only drivers out of the serverless bundle graph. The Postgres
-  // driver ("pg") is only used in local development; production uses Neon's
-  // fetch/WebSocket driver which bundles fine.
-  serverExternalPackages: ["pg"],
+  // Keep node-only and native-binary packages out of the serverless bundle
+  // graph — they are loaded from node_modules at runtime (Vercel's file
+  // tracing copies them, including platform-specific .node binaries):
+  // - "pg" is only used in local development (Neon driver in production)
+  // - "@node-rs/argon2" ships N-API binaries that must not be bundled
+  serverExternalPackages: ["pg", "@node-rs/argon2"],
   images: {
     formats: ["image/avif", "image/webp"],
   },
