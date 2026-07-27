@@ -75,3 +75,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   adapter: PrismaAdapter(getDb()),
   providers: buildProviders(),
 }));
+
+/** Current user id or null — the standard first line of server actions and route handlers. */
+export async function getSessionUserId(): Promise<string | null> {
+  const session = await auth();
+  return session?.user?.id ?? null;
+}
