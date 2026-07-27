@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarPlus, Home, LogOut, Monitor, Moon, Plus, Sun } from "lucide-react";
+import { CalendarPlus, Home, LogOut, Monitor, Moon, NotebookPen, Plus, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useEffect } from "react";
@@ -78,6 +78,10 @@ export function CommandPalette() {
           <CommandItem onSelect={() => run(() => router.push("/calendar?new=1"))}>
             <CalendarPlus aria-hidden />
             New event
+          </CommandItem>
+          <CommandItem onSelect={() => run(() => router.push("/notes?new=1"))}>
+            <NotebookPen aria-hidden />
+            New note
           </CommandItem>
         </CommandGroup>
 

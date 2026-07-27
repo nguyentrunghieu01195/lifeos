@@ -9,9 +9,9 @@ import { test as base, expect, type Page } from "@playwright/test";
  */
 export const test = base.extend({
   page: async ({ page }, use, testInfo) => {
-    const unique = `${testInfo.workerIndex + 1}.${(testInfo.parallelIndex + 1) % 255}.${
-      Math.floor(Math.random() * 255)
-    }.${Math.floor(Math.random() * 254) + 1}`;
+    const unique = `${testInfo.workerIndex + 1}.${(testInfo.parallelIndex + 1) % 255}.${Math.floor(
+      Math.random() * 255,
+    )}.${Math.floor(Math.random() * 254) + 1}`;
     await page.setExtraHTTPHeaders({ "x-forwarded-for": `10.${unique}` });
     // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React's.
     await use(page);

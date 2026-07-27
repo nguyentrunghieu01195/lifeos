@@ -70,7 +70,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Notes",
         href: "/notes",
         icon: StickyNote,
-        status: "soon",
+        status: "available",
         description: "Rich notes with markdown",
       },
       {
