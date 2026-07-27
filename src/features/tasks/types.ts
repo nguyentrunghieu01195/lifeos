@@ -70,5 +70,4 @@ export const RECURRENCE_LABELS: Record<RecurrenceFreq, string> = {
   YEARLY: "year",
 };
 
-/** Standard result envelope returned by task server actions. */
-export type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
+export type { ActionResult } from "@/types/actions";
