@@ -121,7 +121,8 @@ Delivered phase by phase; every phase compiles, passes tests, and ships migratio
 - [x] **Phase 2 — Authentication**: Auth.js v5 — Google + GitHub OAuth, email/password (Argon2id), protected routes
 - [x] **Phase 3 — App shell & Dashboard**: sidebar module map, ⌘K palette, theme toggle, motion, widget grid
 - [x] **Phase 4 — Tasks**: list/board/calendar, subtasks, recurring, tags & projects, AI planning
-- [ ] Phase 5 — Calendar · Phase 6 — Notes · Phase 7 — Documents
+- [x] **Phase 5 — Calendar**: month/week/day/agenda, drag-drop, tasks overlay, AI scheduling, Google-sync-ready model
+- [ ] Phase 6 — Notes · Phase 7 — Documents
 - [ ] Phase 8 — Finance · Phase 9 — Habits · Phase 10 — Health · Phase 11 — Shopping
 - [ ] Phase 12 — Knowledge & Bookmarks · Phase 13 — Global AI Chat · Phase 14 — Search
 - [ ] Phase 15 — Notifications · Phase 16 — Settings & Profile · Phase 17 — Hardening & Launch

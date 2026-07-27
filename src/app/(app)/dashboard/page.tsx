@@ -6,6 +6,8 @@ import { Greeting } from "@/features/dashboard/components/greeting";
 import { ModulesOverviewCard } from "@/features/dashboard/components/modules-overview";
 import { QuickActionsCard } from "@/features/dashboard/components/quick-actions";
 import { TodayTasksCard } from "@/features/dashboard/components/today-tasks";
+import { UpcomingEventsCard } from "@/features/dashboard/components/upcoming-events";
+import { getUpcomingEvents } from "@/features/calendar/server/service";
 import { getTodayTaskSummary } from "@/features/tasks/server/service";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
@@ -23,12 +25,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [user, taskSummary] = await Promise.all([
+  const [user, taskSummary, upcomingEvents] = await Promise.all([
     getDb().user.findUnique({
       where: { id: session.user.id },
       select: { name: true, email: true, image: true, createdAt: true },
     }),
     getTodayTaskSummary(session.user.id),
+    getUpcomingEvents(session.user.id),
   ]);
   if (!user) {
     redirect("/login");
@@ -42,6 +45,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <TodayTasksCard summary={taskSummary} />
+        <UpcomingEventsCard events={upcomingEvents} />
         <AccountCard
           name={user.name}
           email={user.email}

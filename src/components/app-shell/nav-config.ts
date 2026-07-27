@@ -63,7 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Calendar",
         href: "/calendar",
         icon: CalendarDays,
-        status: "soon",
+        status: "available",
         description: "Day, week and month planning",
       },
       {

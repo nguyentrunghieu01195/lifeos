@@ -78,6 +78,10 @@ The authenticated shell lives in the (app) route group: an inset, icon-collapsib
 
 The first domain module and the reference implementation for all that follow: DTOs serialize dates to ISO strings at the server boundary (`src/features/tasks/types.ts`), the RSC page seeds TanStack Query which refetches through `/api/tasks`, and every mutation is a rate-limited server action over an ownership-scoped service (`server/service.ts` — every query and write filters by userId; integration tests assert cross-user isolation). Recurrence is Todoist-style (completion rolls dueAt forward). Board ordering uses fractional positions (`lib/position.ts`) with @dnd-kit. AI task planning goes through the gateway with jsonMode and a zod-validated response contract (`lib/ai-parse.ts`).
 
+## Calendar (Phase 5)
+
+Range-driven module: the RSC page seeds the current month; every other visible range is fetched through `/api/calendar?from&to` with range-keyed TanStack Query caches (optimistic patches apply across all cached ranges). Month view supports drag-and-drop rescheduling (day delta preserves time-of-day and duration); week/day views are absolute-positioned hour grids with click-to-create. Tasks with due dates surface as read-only dashed chips — two modules, one data layer. AI scheduling passes the viewer's local date and timezone offset so relative expressions resolve in their calendar, not the server's UTC. The CalendarEvent model carries source/externalId fields for the future Google Calendar sync.
+
 ## Environments
 
 | Concern   | Development                            | Production (Vercel)                       |
