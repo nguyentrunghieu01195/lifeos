@@ -74,6 +74,10 @@ Auth.js v5 with JWT sessions ([ADR 0005](./docs/adr/0005-authjs-jwt-credentials.
 
 The authenticated shell lives in the (app) route group: an inset, icon-collapsible sidebar rendered from `src/components/app-shell/nav-config.ts` (the single source of truth for the module map — shipping a module flips its status there), a header with the current section, theme toggle and user menu, and a global ⌘K command palette (cmdk) whose open state is the first Zustand store. Route transitions use a `template.tsx` with Motion (fade-and-rise, reduced-motion aware). The dashboard is a widget grid over real data only — each module ships its own widgets alongside its phase.
 
+## Tasks (Phase 4)
+
+The first domain module and the reference implementation for all that follow: DTOs serialize dates to ISO strings at the server boundary (`src/features/tasks/types.ts`), the RSC page seeds TanStack Query which refetches through `/api/tasks`, and every mutation is a rate-limited server action over an ownership-scoped service (`server/service.ts` — every query and write filters by userId; integration tests assert cross-user isolation). Recurrence is Todoist-style (completion rolls dueAt forward). Board ordering uses fractional positions (`lib/position.ts`) with @dnd-kit. AI task planning goes through the gateway with jsonMode and a zod-validated response contract (`lib/ai-parse.ts`).
+
 ## Environments
 
 | Concern   | Development                            | Production (Vercel)                       |
