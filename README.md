@@ -88,9 +88,9 @@ Set the matching key (`GEMINI_API_KEY` / `GROQ_API_KEY` / `AIAND_API_KEY` + `AIA
 1. **Neon** — create a database, copy the pooled connection string.
 2. **Upstash** — create a Redis database, copy the REST URL + token.
 3. **Cloudflare R2** — create a bucket and an API token (Object Read & Write).
-4. **Vercel** — import the repo. Build settings are auto-detected (`pnpm build`).
+4. **Vercel** — import the repo. No build settings needed: the `vercel-build` script applies pending migrations automatically before every build.
 5. Set the environment variables from [.env.example](./.env.example) in Vercel → Project → Settings → Environment Variables.
-6. Run migrations against Neon from your machine or CI: `DATABASE_URL=<neon-url> pnpm db:deploy`.
+6. Migrations run automatically during the Vercel build (`vercel-build`); to run them manually instead: `DATABASE_URL=<neon-url> pnpm db:deploy`.
 
 Boot-time environment validation is strict on Vercel production deployments — a misconfigured deploy fails at startup with a readable report naming each missing variable.
 
