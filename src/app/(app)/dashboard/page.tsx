@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AccountCard } from "@/features/dashboard/components/account-card";
 import { FinanceSummaryCard } from "@/features/dashboard/components/finance-summary";
+import { TodayHabitsCard } from "@/features/dashboard/components/today-habits";
 import { Greeting } from "@/features/dashboard/components/greeting";
 import { ModulesOverviewCard } from "@/features/dashboard/components/modules-overview";
 import { QuickActionsCard } from "@/features/dashboard/components/quick-actions";
@@ -11,6 +12,7 @@ import { TodayTasksCard } from "@/features/dashboard/components/today-tasks";
 import { UpcomingEventsCard } from "@/features/dashboard/components/upcoming-events";
 import { getUpcomingEvents } from "@/features/calendar/server/service";
 import { getDashboardFinance } from "@/features/finance/server/service";
+import { getTodayHabits } from "@/features/habits/server/service";
 import { getRecentNotes } from "@/features/notes/server/service";
 import { getTodayTaskSummary } from "@/features/tasks/server/service";
 import { auth } from "@/lib/auth";
@@ -29,7 +31,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [user, taskSummary, upcomingEvents, recentNotes, finance] = await Promise.all([
+  const [user, taskSummary, upcomingEvents, recentNotes, finance, todayHabits] = await Promise.all([
     getDb().user.findUnique({
       where: { id: session.user.id },
       select: { name: true, email: true, image: true, createdAt: true },
@@ -38,6 +40,7 @@ export default async function DashboardPage() {
     getUpcomingEvents(session.user.id),
     getRecentNotes(session.user.id),
     getDashboardFinance(session.user.id),
+    getTodayHabits(session.user.id),
   ]);
   if (!user) {
     redirect("/login");
@@ -57,6 +60,11 @@ export default async function DashboardPage() {
           income={finance.income}
           expense={finance.expense}
           topCategory={finance.topCategory}
+        />
+        <TodayHabitsCard
+          total={todayHabits.total}
+          done={todayHabits.done}
+          habits={todayHabits.habits}
         />
         <AccountCard
           name={user.name}

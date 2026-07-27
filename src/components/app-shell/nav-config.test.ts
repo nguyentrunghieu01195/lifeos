@@ -19,7 +19,7 @@ describe("nav-config", () => {
     expect(ALL_NAV_ITEMS).toHaveLength(13);
   });
 
-  it("dashboard, tasks, calendar, notes, documents and finance are live as of Phase 8", () => {
+  it("dashboard, tasks, calendar, notes, documents, finance and habits are live as of Phase 9", () => {
     expect(AVAILABLE_NAV_ITEMS.map((item) => item.href)).toEqual([
       "/dashboard",
       "/tasks",
@@ -27,6 +27,7 @@ describe("nav-config", () => {
       "/notes",
       "/documents",
       "/finance",
+      "/habits",
     ]);
   });
 

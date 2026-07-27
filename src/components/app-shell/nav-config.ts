@@ -96,7 +96,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Habits",
         href: "/habits",
         icon: Flame,
-        status: "soon",
+        status: "available",
         description: "Streaks and daily tracking",
       },
       {
