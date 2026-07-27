@@ -13,6 +13,7 @@ export const test = base.extend({
       Math.floor(Math.random() * 255)
     }.${Math.floor(Math.random() * 254) + 1}`;
     await page.setExtraHTTPHeaders({ "x-forwarded-for": `10.${unique}` });
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture `use`, not React's.
     await use(page);
   },
 });
