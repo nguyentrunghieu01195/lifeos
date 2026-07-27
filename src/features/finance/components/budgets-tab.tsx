@@ -26,6 +26,8 @@ interface BudgetsTabProps {
   budgets: BudgetDto[];
   categories: CategoryDto[];
   overview: MonthOverviewDto;
+  /** Invalidates the finance query after a successful mutation. */
+  onMutated: () => void;
 }
 
 interface BudgetTarget {
@@ -34,7 +36,7 @@ interface BudgetTarget {
   current: number;
 }
 
-export function BudgetsTab({ month, budgets, categories, overview }: BudgetsTabProps) {
+export function BudgetsTab({ month, budgets, categories, overview, onMutated }: BudgetsTabProps) {
   const [target, setTarget] = useState<BudgetTarget | null>(null);
 
   const spentByCategory = new Map(
@@ -110,7 +112,12 @@ export function BudgetsTab({ month, budgets, categories, overview }: BudgetsTabP
         </CardContent>
       </Card>
 
-      <SetBudgetDialog month={month} target={target} onClose={() => setTarget(null)} />
+      <SetBudgetDialog
+        month={month}
+        target={target}
+        onClose={() => setTarget(null)}
+        onMutated={onMutated}
+      />
     </div>
   );
 }
@@ -188,10 +195,12 @@ function SetBudgetDialog({
   month,
   target,
   onClose,
+  onMutated,
 }: {
   month: string;
   target: BudgetTarget | null;
   onClose: () => void;
+  onMutated: () => void;
 }) {
   return (
     <Dialog open={target !== null} onOpenChange={(open) => !open && onClose()}>
@@ -202,6 +211,7 @@ function SetBudgetDialog({
             month={month}
             target={target}
             onClose={onClose}
+            onMutated={onMutated}
           />
         ) : null}
       </DialogContent>
@@ -213,10 +223,12 @@ function SetBudgetForm({
   month,
   target,
   onClose,
+  onMutated,
 }: {
   month: string;
   target: BudgetTarget;
   onClose: () => void;
+  onMutated: () => void;
 }) {
   const [amount, setAmount] = useState(target.current > 0 ? String(target.current) : "");
   const [busy, setBusy] = useState(false);
@@ -229,8 +241,12 @@ function SetBudgetForm({
       amountMinor,
     });
     setBusy(false);
-    if (result.ok) onClose();
-    else toast.error(result.error);
+    if (result.ok) {
+      onClose();
+      onMutated();
+    } else {
+      toast.error(result.error);
+    }
   };
 
   const submit = async () => {

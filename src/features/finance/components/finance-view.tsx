@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { useFinance, useInvalidateFinance, type FinanceSnapshot } from "../hooks";
 import { addMonths, currentMonthKey, formatMonthKey } from "../lib/money";
 import { createStarterCategoriesAction } from "../server/actions";
 import type { BudgetDto, CategoryDto, MonthOverviewDto, TransactionDto } from "../types";
@@ -26,18 +27,25 @@ interface FinanceViewProps {
   budgets: BudgetDto[];
 }
 
-export function FinanceView({
-  month,
-  overview,
-  transactions,
-  categories,
-  budgets,
-}: FinanceViewProps) {
+export function FinanceView(props: FinanceViewProps) {
+  const { month } = props;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [navigating, startNavigation] = useTransition();
   const [seeding, setSeeding] = useState(false);
+  const invalidate = useInvalidateFinance();
+
+  // RSC seeds the query; refetches after mutations come from /api/finance.
+  const initial: FinanceSnapshot = {
+    month,
+    overview: props.overview,
+    transactions: props.transactions,
+    categories: props.categories,
+    budgets: props.budgets,
+  };
+  const { data } = useFinance(month, initial);
+  const { overview, transactions, categories, budgets } = data;
 
   const requestedTab = searchParams.get("tab");
   const tab: TabId = (TABS as readonly string[]).includes(requestedTab ?? "")
@@ -58,7 +66,11 @@ export function FinanceView({
     setSeeding(true);
     const result = await createStarterCategoriesAction();
     setSeeding(false);
-    if (!result.ok) toast.error(result.error);
+    if (result.ok) {
+      invalidate();
+    } else {
+      toast.error(result.error);
+    }
   };
 
   return (
@@ -131,10 +143,17 @@ export function FinanceView({
           month={month}
           transactions={transactions}
           categories={categories}
+          onMutated={invalidate}
         />
       ) : null}
       {tab === "budgets" ? (
-        <BudgetsTab month={month} budgets={budgets} categories={categories} overview={overview} />
+        <BudgetsTab
+          month={month}
+          budgets={budgets}
+          categories={categories}
+          overview={overview}
+          onMutated={invalidate}
+        />
       ) : null}
     </div>
   );

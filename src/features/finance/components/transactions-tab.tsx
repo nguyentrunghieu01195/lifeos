@@ -65,6 +65,8 @@ interface TransactionsTabProps {
   month: string;
   transactions: TransactionDto[];
   categories: CategoryDto[];
+  /** Invalidates the finance query after a successful mutation. */
+  onMutated: () => void;
 }
 
 interface FormState {
@@ -75,7 +77,12 @@ interface FormState {
   categoryId: string;
 }
 
-export function TransactionsTab({ month, transactions, categories }: TransactionsTabProps) {
+export function TransactionsTab({
+  month,
+  transactions,
+  categories,
+  onMutated,
+}: TransactionsTabProps) {
   // Viewing a past/future month: default new entries into THAT month so the
   // added row is visible where the user is looking.
   const defaultDate = month === currentMonthKey() ? todayDateString() : `${month}-01`;
@@ -106,23 +113,34 @@ export function TransactionsTab({ month, transactions, categories }: Transaction
   );
 
   const submitQuickAdd = async () => {
-    const amountMinor = parseAmountInput(form.amount);
+    const submitted = { ...form };
+    const amountMinor = parseAmountInput(submitted.amount);
     if (amountMinor === null) {
       toast.error("Enter a valid amount (whole đồng).");
       return;
     }
+    // Clear the fields immediately so the next entry can be typed while this
+    // one saves — resetting after the await would wipe whatever the user
+    // typed in the meantime.
+    setForm((state) => ({ ...state, amount: "", note: "" }));
     setAdding(true);
     const result = await createTransactionAction({
-      type: form.type,
+      type: submitted.type,
       amountMinor,
-      note: form.note.trim(),
-      date: form.date,
-      categoryId: form.categoryId === NONE ? null : form.categoryId,
+      note: submitted.note.trim(),
+      date: submitted.date,
+      categoryId: submitted.categoryId === NONE ? null : submitted.categoryId,
     });
     setAdding(false);
     if (result.ok) {
-      setForm((state) => ({ ...state, amount: "", note: "" }));
+      onMutated();
     } else {
+      // Give the input back, unless the user is already typing the next one.
+      setForm((state) =>
+        state.amount === "" && state.note === ""
+          ? { ...state, amount: submitted.amount, note: submitted.note }
+          : state,
+      );
       toast.error(result.error);
     }
   };
@@ -132,8 +150,12 @@ export function TransactionsTab({ month, transactions, categories }: Transaction
     setBusy(true);
     const result = await deleteTransactionAction(deleting.id);
     setBusy(false);
-    if (result.ok) setDeleting(null);
-    else toast.error(result.error);
+    if (result.ok) {
+      setDeleting(null);
+      onMutated();
+    } else {
+      toast.error(result.error);
+    }
   };
 
   const runAiCategorize = async () => {
@@ -176,6 +198,7 @@ export function TransactionsTab({ month, transactions, categories }: Transaction
         `Categorized ${result.data.applied} transaction${result.data.applied === 1 ? "" : "s"}.`,
       );
       setSuggestions(null);
+      onMutated();
     } else {
       toast.error(result.error);
     }
@@ -482,6 +505,7 @@ export function TransactionsTab({ month, transactions, categories }: Transaction
         categories={categories}
         onClose={() => setEditing(null)}
         onNewCategory={() => setNewCategoryFor("edit")}
+        onMutated={onMutated}
       />
 
       <Dialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
@@ -517,6 +541,7 @@ export function TransactionsTab({ month, transactions, categories }: Transaction
             );
           }
           setNewCategoryFor(null);
+          onMutated();
         }}
       />
 
@@ -595,11 +620,13 @@ function EditTransactionDialog({
   categories,
   onClose,
   onNewCategory,
+  onMutated,
 }: {
   transaction: TransactionDto | null;
   categories: CategoryDto[];
   onClose: () => void;
   onNewCategory: () => void;
+  onMutated: () => void;
 }) {
   return (
     <Dialog open={transaction !== null} onOpenChange={(open) => !open && onClose()}>
@@ -616,6 +643,7 @@ function EditTransactionDialog({
             categories={categories}
             onClose={onClose}
             onNewCategory={onNewCategory}
+            onMutated={onMutated}
           />
         ) : null}
       </DialogContent>
@@ -628,11 +656,13 @@ function EditTransactionForm({
   categories,
   onClose,
   onNewCategory,
+  onMutated,
 }: {
   transaction: TransactionDto;
   categories: CategoryDto[];
   onClose: () => void;
   onNewCategory: () => void;
+  onMutated: () => void;
 }) {
   const [state, setState] = useState<FormState>({
     type: transaction.type,
@@ -661,6 +691,7 @@ function EditTransactionForm({
     setBusy(false);
     if (result.ok) {
       onClose();
+      onMutated();
     } else {
       toast.error(result.error);
     }

@@ -22,8 +22,13 @@ async function registerAndOpenFinance(page: Page): Promise<void> {
 }
 
 async function seedCategoriesAndOpenTransactions(page: Page): Promise<void> {
-  await page.getByRole("button", { name: "Add starter categories" }).click();
-  await expect(page.getByRole("button", { name: "Add starter categories" })).not.toBeVisible();
+  // First interaction after a production page load: clicks fired before React
+  // hydration are lost, so retry the click until it takes effect.
+  const seedButton = page.getByRole("button", { name: "Add starter categories" });
+  await expect(async () => {
+    await seedButton.click();
+    await expect(seedButton).not.toBeVisible({ timeout: 4_000 });
+  }).toPass({ timeout: 30_000 });
   await page.getByRole("tab", { name: "Transactions" }).click();
 }
 
@@ -42,7 +47,7 @@ async function addTransaction(
     await page.getByRole("option", { name: new RegExp(category) }).click();
   }
   await page.getByRole("button", { name: "Add", exact: true }).click();
-  await expect(page.getByText(note)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(note)).toBeVisible({ timeout: 20_000 });
 }
 
 test.describe("finance", () => {
