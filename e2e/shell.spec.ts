@@ -30,10 +30,11 @@ test.describe("app shell", () => {
     await expect(page.getByRole("link", { name: "Finance", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Habits", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Health", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Shopping", exact: true })).toBeVisible();
     // Unshipped modules are visible but disabled.
-    const shoppingButton = page.getByRole("button", { name: /Shopping/ });
-    await expect(shoppingButton).toBeVisible();
-    await expect(shoppingButton).toBeDisabled();
+    const knowledgeButton = page.getByRole("button", { name: /Knowledge base/ });
+    await expect(knowledgeButton).toBeVisible();
+    await expect(knowledgeButton).toBeDisabled();
     void sidebar;
   });
 
@@ -56,7 +57,7 @@ test.describe("app shell", () => {
 
     await expect(page.getByText(/, Shell/)).toBeVisible();
     await expect(page.getByText("Quick actions")).toBeVisible();
-    await expect(page.getByText(/8 of 12 live/)).toBeVisible();
+    await expect(page.getByText(/9 of 12 live/)).toBeVisible();
 
     await page.getByRole("button", { name: "Account menu" }).click();
     await page.getByRole("menuitem", { name: "Sign out" }).click();

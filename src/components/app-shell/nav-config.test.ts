@@ -19,7 +19,7 @@ describe("nav-config", () => {
     expect(ALL_NAV_ITEMS).toHaveLength(13);
   });
 
-  it("8 modules live as of Phase 10", () => {
+  it("9 modules live as of Phase 11", () => {
     expect(AVAILABLE_NAV_ITEMS.map((item) => item.href)).toEqual([
       "/dashboard",
       "/tasks",
@@ -29,6 +29,7 @@ describe("nav-config", () => {
       "/finance",
       "/habits",
       "/health",
+      "/shopping",
     ]);
   });
 

@@ -110,7 +110,7 @@ export const NAV_GROUPS: NavGroup[] = [
         title: "Shopping",
         href: "/shopping",
         icon: ShoppingCart,
-        status: "soon",
+        status: "available",
         description: "Smart lists with totals",
       },
     ],
